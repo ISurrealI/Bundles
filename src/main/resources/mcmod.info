@@ -1,0 +1,11 @@
+[
+{
+  "modid": "bundles",
+  "name": "Bundles",
+  "description": "Backport of Bundle item",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "authorList": ["Surreal"]
+}
+]

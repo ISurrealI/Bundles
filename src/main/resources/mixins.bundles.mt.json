@@ -1,0 +1,12 @@
+{
+  "package": "surreal.bundles.mixins.late",
+  "refmap": "mixins.bundles.refmap.json",
+  "target": "@env(DEFAULT)",
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "MixinMTMain"
+  ]
+}
