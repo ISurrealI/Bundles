@@ -4,4 +4,5 @@ public class NBTConstants {
 
     public static final String ITEMS = "Items";
     public static final String ITEM_AMOUNT = "Amount";
+    public static final String COLOR = "Color";
 }

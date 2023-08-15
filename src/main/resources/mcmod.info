@@ -5,7 +5,8 @@
   "description": "Backport of Bundle item",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
-  "authorList": ["Surreal"]
+  "url": "https://legacy.curseforge.com/minecraft/mc-mods/bundles-backport",
+  "authorList": ["Surreal"],
+  "credits": "Thanks to Sir Squidly for creating grayscale texture of bundles"
 }
 ]

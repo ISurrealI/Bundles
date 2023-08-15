@@ -28,6 +28,10 @@ public class ModConfig {
     @Config.RangeInt(min = 0)
     public static int bundleLevels = 1;
 
+    @Config.Name("Custom Colors")
+    @Config.Comment("Allows mixing colors like leather armor")
+    public static boolean allowCustomColors = false;
+
     @Config.Name("Is Blacklist")
     @Config.Comment("Is item list blacklist or not")
     public static boolean isBlackList = true;

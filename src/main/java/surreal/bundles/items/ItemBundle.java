@@ -1,22 +1,23 @@
 package surreal.bundles.items;
 
+import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.*;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import surreal.bundles.Bundles;
 import surreal.bundles.ModConfig;
 import surreal.bundles.ModSounds;
@@ -27,8 +28,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Objects;
 
-import static surreal.bundles.utils.NBTConstants.ITEMS;
-import static surreal.bundles.utils.NBTConstants.ITEM_AMOUNT;
+import static surreal.bundles.utils.NBTConstants.*;
 
 public class ItemBundle extends Item {
 
@@ -42,6 +42,15 @@ public class ItemBundle extends Item {
 
         int level = (int) (a / b) + 1;
         return b * level;
+    };
+
+    @SideOnly(Side.CLIENT)
+    public static IItemColor BUNDLE_COLOR = (stack, tintIndex) -> {
+        if (tintIndex == 0) {
+            return getColor(stack);
+        }
+
+        return 0xFFFFFF;
     };
 
     public ItemBundle() {
@@ -60,6 +69,20 @@ public class ItemBundle extends Item {
 
             if (size == ModConfig.bundleLimit) tooltip.add(TextFormatting.DARK_RED + str);
             else tooltip.add(str);
+        }
+    }
+
+    // Sub Items
+    @Override
+    public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> items) {
+        super.getSubItems(tab, items);
+
+        if (!ModConfig.allowCustomColors && this.isInCreativeTab(tab)) {
+            for (int i = 0; i < 16; i++) {
+                ItemStack stack = new ItemStack(this);
+                ItemBundle.setColor(stack, EnumDyeColor.byDyeDamage(i));
+                items.add(stack);
+            }
         }
     }
 
@@ -220,6 +243,26 @@ public class ItemBundle extends Item {
 
         slot = checkSlot(bundle, slot);
         return new ItemStack(list.getCompoundTagAt(slot));
+    }
+
+    public static int getColor(ItemStack bundle) {
+
+        int def = 13464390;
+        if (!bundle.hasTagCompound()) return def;
+
+        NBTTagCompound tag = Objects.requireNonNull(bundle.getTagCompound());
+        if (!tag.hasKey(COLOR)) return def;
+
+        return tag.getInteger(COLOR);
+    }
+
+    public static void setColor(ItemStack bundle, int color) {
+        NBTTagCompound tag = getOrCreateTag(bundle);
+        tag.setInteger(COLOR, color);
+    }
+
+    public static void setColor(ItemStack bundle, EnumDyeColor color) {
+        setColor(bundle, color.getColorValue());
     }
 
     private static void setAmount(ItemStack bundle, int amount) {

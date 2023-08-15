@@ -2,13 +2,16 @@ package surreal.bundles;
 
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Items;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
 import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,6 +26,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import surreal.bundles.events.TooltipEvent;
 import surreal.bundles.items.ItemBundle;
+import surreal.bundles.recipes.RecipeBundleColoring;
 
 import java.util.Objects;
 import java.util.Set;
@@ -82,7 +86,17 @@ public class Bundles {
     public void registerRecipe(RegistryEvent.Register<IRecipe> event) {
         ItemStack string = new ItemStack(Items.STRING);
         ItemStack hide = new ItemStack(Items.RABBIT_HIDE);
+
         GameRegistry.addShapedRecipe(BUNDLE.getRegistryName(), null, new ItemStack(BUNDLE), "ABA", "B B", "BBB", 'A', string, 'B', hide);
+
+        if (!ModConfig.allowCustomColors) {
+            for (int i = 0; i < 16; i++) {
+                EnumDyeColor color = EnumDyeColor.byDyeDamage(i);
+                ItemStack stack = new ItemStack(BUNDLE);
+                ItemBundle.setColor(stack, color);
+                GameRegistry.addShapelessRecipe(new ResourceLocation(BUNDLE.getRegistryName() + "_" + color.getName()), null, stack, Ingredient.fromItem(BUNDLE), Ingredient.fromStacks(new ItemStack(Items.DYE, 1, color.getDyeDamage())));
+            }
+        } else event.getRegistry().register(new RecipeBundleColoring().setRegistryName(MODID, "bundle_coloring"));
     }
 
     @SubscribeEvent
@@ -99,5 +113,11 @@ public class Bundles {
     @SubscribeEvent
     public void registerModels(ModelRegistryEvent event) {
         ModelLoader.setCustomModelResourceLocation(BUNDLE, 0, new ModelResourceLocation(new ResourceLocation(MODID, "bundle"), "inventory"));
+    }
+
+    @SideOnly(Side.CLIENT)
+    @SubscribeEvent
+    public void registerItemColors(ColorHandlerEvent.Item event) {
+        event.getItemColors().registerItemColorHandler(ItemBundle.BUNDLE_COLOR, BUNDLE);
     }
 }
