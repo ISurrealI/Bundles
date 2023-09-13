@@ -163,6 +163,7 @@ public class ItemBundle extends Item {
 
         NBTTagCompound compound = stack.serializeNBT();
         compound.setByte("Count", (byte) countToAdd);
+        compound.setInteger("Count", countToAdd);
 
         list.appendTag(compound);
 
@@ -188,7 +189,9 @@ public class ItemBundle extends Item {
         if (amount == stack.getCount()) {
             list.removeTag(slot);
         } else {
-            stackTag.setByte("Count", (byte) (stack.getCount() - amount));
+            int count = stack.getCount() - amount;
+            stackTag.setByte("Count", (byte) count);
+            stackTag.setInteger("Count", count);
             stack.setCount(amount);
         }
 
