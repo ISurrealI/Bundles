@@ -44,15 +44,6 @@ public class ItemBundle extends Item {
         return b * level;
     };
 
-    @SideOnly(Side.CLIENT)
-    public static IItemColor BUNDLE_COLOR = (stack, tintIndex) -> {
-        if (tintIndex == 0) {
-            return getColor(stack);
-        }
-
-        return 0xFFFFFF;
-    };
-
     public ItemBundle() {
         setMaxStackSize(1);
         setCreativeTab(CreativeTabs.MISC);
@@ -162,8 +153,11 @@ public class ItemBundle extends Item {
         addAmount(bundle, amountToAdd);
 
         NBTTagCompound compound = stack.serializeNBT();
-        compound.setByte("Count", (byte) countToAdd);
-        compound.setInteger("Count", countToAdd);
+
+        if (compound.hasKey("Count", Constants.NBT.TAG_BYTE)) {
+            compound.setByte("Count", (byte) countToAdd);
+        }
+        else compound.setInteger("Count", countToAdd);
 
         list.appendTag(compound);
 
@@ -190,8 +184,12 @@ public class ItemBundle extends Item {
             list.removeTag(slot);
         } else {
             int count = stack.getCount() - amount;
-            stackTag.setByte("Count", (byte) count);
-            stackTag.setInteger("Count", count);
+
+            if (stackTag.hasKey("Count", Constants.NBT.TAG_BYTE)) {
+                stackTag.setByte("Count", (byte) count);
+            }
+            else stackTag.setInteger("Count", count);
+
             stack.setCount(amount);
         }
 
@@ -265,7 +263,8 @@ public class ItemBundle extends Item {
     }
 
     public static void setColor(ItemStack bundle, EnumDyeColor color) {
-        setColor(bundle, color.getColorValue());
+        float[] components = color.getColorComponentValues();
+        setColor(bundle, (int) (components[0] * 255 * components[1] * 255 * components[2] * 255));
     }
 
     private static void setAmount(ItemStack bundle, int amount) {

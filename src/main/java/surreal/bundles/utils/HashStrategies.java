@@ -22,7 +22,7 @@ public class HashStrategies {
 
         @Override
         public boolean equals(ItemStack a, ItemStack b) {
-            if (a == null) return false;
+            if (a == null || b == null) return false;
             boolean nbt = !a.hasTagCompound() || Objects.requireNonNull(a.getTagCompound()).equals(Objects.requireNonNull(b.getTagCompound()));
             return a.isItemEqual(b) && nbt;
         }

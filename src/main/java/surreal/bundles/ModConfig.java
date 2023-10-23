@@ -95,7 +95,7 @@ public class ModConfig {
                 if (item == null || item == Items.AIR) {
                     logger.error("ID of item in config item list at {} is set wrong, please fix it immediately!", index);
                     stack = ItemStack.EMPTY;
-                } else stack = new ItemStack(item, meta);
+                } else stack = new ItemStack(item, 1, meta);
 
                 if (!stack.isEmpty()) {
                     stack.setTagCompound(tag);

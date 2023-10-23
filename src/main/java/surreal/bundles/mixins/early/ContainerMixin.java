@@ -7,10 +7,7 @@ import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import surreal.bundles.Bundles;
 import surreal.bundles.ModConfig;
 import surreal.bundles.ModSounds;
@@ -86,14 +83,7 @@ public abstract class ContainerMixin {
                 }
                 else if (dragType == 5 && slot7 != null && itemstack12.getItem() instanceof ItemBundle && ItemBundle.getItemAmount(itemstack12) > 0) {
                     if (ItemBundle.getItemAmount(itemstack12) > 0) {
-                        int slot = GuiScreen.isCtrlKeyDown() ? Integer.MAX_VALUE : 0;
-                        ItemStack st = ItemBundle.getItem(itemstack12, slot);
-
-                        if (Container.canAddItemToSlot(slot7, st, true) && slot7.isItemValid(st)) {
-                            if (player.world.isRemote) player.playSound(ModSounds.REMOVE, 1, 1);
-                            slot7.putStack(ItemBundle.removeItem(itemstack12, slot, Math.min(slot7.getItemStackLimit(st), st.getMaxStackSize())));
-                        }
-
+                        bundles$removeItem(player, itemstack12, slot7);
                     } else if (Container.canAddItemToSlot(slot7, itemstack12, true) && slot7.isItemValid(itemstack12)) {
                         dragSlots.add(slot7);
                     }
@@ -203,14 +193,7 @@ public abstract class ContainerMixin {
                     {
                         if (itemstack11.getItem() instanceof ItemBundle && ItemBundle.getItemAmount(itemstack11) > 0) {
                             if (dragType == 1) {
-                                int slot = GuiScreen.isCtrlKeyDown() ? Integer.MAX_VALUE : 0;
-                                ItemStack st = ItemBundle.getItem(itemstack11, slot);
-
-                                if (!st.isEmpty() && slot6.isItemValid(st)) {
-                                    if (player.world.isRemote) player.playSound(ModSounds.REMOVE, 1, 1);
-                                    slot6.putStack(ItemBundle.removeItem(itemstack11, slot, Math.min(slot6.getItemStackLimit(st), st.getMaxStackSize())));
-                                }
-
+                                bundles$removeItem(player, itemstack11, slot6);
                             } else {
                                 slot6.putStack(itemstack11.copy());
                                 itemstack11.shrink(1);
@@ -239,12 +222,7 @@ public abstract class ContainerMixin {
                             else
                             {
                                 if (dragType == 1 && itemstack8.getItem() instanceof ItemBundle && ItemBundle.getItemAmount(itemstack8) > 0) {
-                                    int slot = GuiScreen.isCtrlKeyDown() ? Integer.MAX_VALUE : 0;
-                                    ItemStack st = ItemBundle.getItem(itemstack8, slot);
-
-                                    if (player.world.isRemote) player.playSound(ModSounds.REMOVE, 1, 1);
-                                    inventoryplayer.setItemStack(ItemBundle.removeItem(itemstack8, slot, Math.min(slot6.getItemStackLimit(st), st.getMaxStackSize())));
-
+                                    bundles$removeHeldItem(player, itemstack8, slot6);
                                 } else {
                                     int l2 = dragType == 0 ? itemstack8.getCount() : (itemstack8.getCount() + 1) / 2;
                                     inventoryplayer.setItemStack(slot6.decrStackSize(l2));
@@ -259,12 +237,10 @@ public abstract class ContainerMixin {
                             }
                         }
                         else if (itemstack11.getItem() instanceof ItemBundle && Bundles.canPutItem(itemstack8) && ItemBundle.getItemAmount(itemstack11) < ModConfig.bundleLimit && !itemstack8.isEmpty() && dragType == 1) {
-                            if (player.world.isRemote) player.playSound(ModSounds.INSERT, 1, 1);
-                            ItemBundle.addItem(itemstack11, itemstack8);
+                            bundles$insertItem(player, itemstack11, itemstack8);
                         }
                         else if (itemstack8.getItem() instanceof ItemBundle && Bundles.canPutItem(itemstack11) && ItemBundle.getItemAmount(itemstack8) < ModConfig.bundleLimit && dragType == 1) {
-                            if (player.world.isRemote) player.playSound(ModSounds.INSERT, 1, 1);
-                            ItemBundle.addItem(itemstack8, itemstack11);
+                            bundles$insertItem(player, itemstack11, itemstack8);
                         }
                         else if (slot6.isItemValid(itemstack11))
                         {
@@ -431,5 +407,31 @@ public abstract class ContainerMixin {
         }
 
         return itemstack;
+    }
+
+    @Unique
+    private void bundles$insertItem(EntityPlayer player, ItemStack bundle, ItemStack stackToAdd) {
+        if (player.world.isRemote) player.playSound(ModSounds.INSERT, 1, 1);
+        ItemBundle.addItem(bundle, stackToAdd);
+    }
+
+    @Unique
+    private void bundles$removeItem(EntityPlayer player, ItemStack bundle, Slot slotInventory) {
+        int slot = GuiScreen.isCtrlKeyDown() ? Integer.MAX_VALUE : 0;
+        ItemStack st = ItemBundle.getItem(bundle, slot);
+
+        if (Container.canAddItemToSlot(slotInventory, st, true) && slotInventory.isItemValid(st)) {
+            if (player.world.isRemote) player.playSound(ModSounds.REMOVE, 1, 1);
+            slotInventory.putStack(ItemBundle.removeItem(bundle, slot, Math.min(slotInventory.getItemStackLimit(st), st.getMaxStackSize())));
+        }
+    }
+
+    @Unique
+    private void bundles$removeHeldItem(EntityPlayer player, ItemStack bundle, Slot slotInventory) {
+        int slot = GuiScreen.isCtrlKeyDown() ? Integer.MAX_VALUE : 0;
+        ItemStack st = ItemBundle.getItem(bundle, slot);
+
+        if (player.world.isRemote) player.playSound(ModSounds.REMOVE, 1, 1);
+        player.inventory.setItemStack(ItemBundle.removeItem(bundle, slot, Math.min(slotInventory.getItemStackLimit(st), st.getMaxStackSize())));
     }
 }

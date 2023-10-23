@@ -1,6 +1,5 @@
 package surreal.bundles;
 
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.init.Items;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
@@ -11,9 +10,6 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraftforge.client.event.ColorHandlerEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -22,9 +18,11 @@ import net.minecraftforge.fml.common.event.FMLConstructionEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import surreal.bundles.events.TooltipEvent;
+import org.apache.logging.log4j.LogManager;
+import surreal.bundles.client.ClientProxy;
+import surreal.bundles.client.TooltipEvent;
 import surreal.bundles.items.ItemBundle;
 import surreal.bundles.recipes.RecipeBundleColoring;
 
@@ -45,7 +43,10 @@ public class Bundles {
     @Mod.EventHandler
     public void construction(FMLConstructionEvent event) {
         MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(new TooltipEvent());
+        if (FMLLaunchHandler.side() == Side.CLIENT) {
+            MinecraftForge.EVENT_BUS.register(new ClientProxy());
+            MinecraftForge.EVENT_BUS.register(new TooltipEvent());
+        }
     }
 
     @Mod.EventHandler
@@ -62,8 +63,9 @@ public class Bundles {
     }
 
     public static boolean canPutItem(ItemStack stack) {
+        LogManager.getLogger("canPutItem").info(itemSet.contains(stack));
         boolean blacklist = ModConfig.isBlackList != itemSet.contains(stack);
-        boolean tools = ModConfig.allowTools || !stack.isItemStackDamageable() || !(stack.getItem() instanceof ItemTool);
+        boolean tools = ModConfig.allowTools || (!stack.isItemStackDamageable() && !(stack.getItem() instanceof ItemTool));
         boolean storage = ModConfig.allowStorageItems || (!stack.hasTagCompound() || !hasAnyKeys(Objects.requireNonNull(stack.getTagCompound()), "BlockEntityTag", "Items"));
         return blacklist && tools && storage;
     }
@@ -107,17 +109,5 @@ public class Bundles {
     private static <T extends Item> T registerItem(String name, T item) {
         item.setRegistryName(MODID, name).setTranslationKey(MODID + "." + name);
         return item;
-    }
-
-    @SideOnly(Side.CLIENT)
-    @SubscribeEvent
-    public void registerModels(ModelRegistryEvent event) {
-        ModelLoader.setCustomModelResourceLocation(BUNDLE, 0, new ModelResourceLocation(new ResourceLocation(MODID, "bundle"), "inventory"));
-    }
-
-    @SideOnly(Side.CLIENT)
-    @SubscribeEvent
-    public void registerItemColors(ColorHandlerEvent.Item event) {
-        event.getItemColors().registerItemColorHandler(ItemBundle.BUNDLE_COLOR, BUNDLE);
     }
 }
