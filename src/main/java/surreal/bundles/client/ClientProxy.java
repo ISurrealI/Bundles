@@ -2,6 +2,7 @@ package surreal.bundles.client;
 
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
@@ -27,7 +28,9 @@ public class ClientProxy {
 
     public static IItemColor BUNDLE_COLOR = (stack, tintIndex) -> {
         if (tintIndex == 0) {
-            return ItemBundle.getColor(stack);
+            int color = ItemBundle.getColor(stack);
+            if (color < 0) color = EnumDyeColor.byDyeDamage(-color).getColorValue();
+            return color;
         }
 
         return 0xFFFFFF;

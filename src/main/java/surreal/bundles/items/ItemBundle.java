@@ -1,6 +1,5 @@
 package surreal.bundles.items;
 
-import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.creativetab.CreativeTabs;
@@ -16,11 +15,9 @@ import net.minecraft.util.*;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import surreal.bundles.Bundles;
-import surreal.bundles.ModConfig;
 import surreal.bundles.ModSounds;
+import surreal.bundles.config.ConfigHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,8 +34,8 @@ public class ItemBundle extends Item {
 
         if (amount == 0) return 0F;
 
-        float a = (float) amount / ModConfig.bundleLimit;
-        float b = 1F / ModConfig.bundleLevels;
+        float a = (float) amount / ConfigHandler.bundleLimit;
+        float b = 1F / ConfigHandler.bundleLevels;
 
         int level = (int) (a / b) + 1;
         return b * level;
@@ -56,9 +53,9 @@ public class ItemBundle extends Item {
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         if (stack.hasTagCompound()) {
             int size = getItemAmount(stack);
-            String str = I18n.format("item.bundles.bundle.fullness", size, ModConfig.bundleLimit);
+            String str = I18n.format("item.bundles.bundle.fullness", size, ConfigHandler.bundleLimit);
 
-            if (size == ModConfig.bundleLimit) tooltip.add(TextFormatting.DARK_RED + str);
+            if (size == ConfigHandler.bundleLimit) tooltip.add(TextFormatting.DARK_RED + str);
             else tooltip.add(str);
         }
     }
@@ -68,7 +65,7 @@ public class ItemBundle extends Item {
     public void getSubItems(@Nonnull CreativeTabs tab, @Nonnull NonNullList<ItemStack> items) {
         super.getSubItems(tab, items);
 
-        if (!ModConfig.allowCustomColors && this.isInCreativeTab(tab)) {
+        if (!ConfigHandler.allowCustomColors && this.isInCreativeTab(tab)) {
             for (int i = 0; i < 16; i++) {
                 ItemStack stack = new ItemStack(this);
                 ItemBundle.setColor(stack, EnumDyeColor.byDyeDamage(i));
@@ -80,7 +77,7 @@ public class ItemBundle extends Item {
     // Bar
     @Override
     public double getDurabilityForDisplay(@Nonnull ItemStack stack) {
-        return 1D - ((double) getItemAmount(stack) / ModConfig.bundleLimit);
+        return 1D - ((double) getItemAmount(stack) / ConfigHandler.bundleLimit);
     }
 
     @Override
@@ -205,7 +202,7 @@ public class ItemBundle extends Item {
     }
 
     public static int getEmptyAmount(ItemStack bundle) {
-        return ModConfig.bundleLimit - getItemAmount(bundle);
+        return ConfigHandler.bundleLimit - getItemAmount(bundle);
     }
 
     public static int getItemAmount(ItemStack bundle) {
@@ -215,7 +212,7 @@ public class ItemBundle extends Item {
     }
 
     public static boolean isBundleFull(ItemStack bundle) {
-        return getItemAmount(bundle) == ModConfig.bundleLimit;
+        return getItemAmount(bundle) == ConfigHandler.bundleLimit;
     }
 
     public static ItemStack[] getItems(ItemStack bundle) {
@@ -247,7 +244,6 @@ public class ItemBundle extends Item {
     }
 
     public static int getColor(ItemStack bundle) {
-
         int def = 13464390;
         if (!bundle.hasTagCompound()) return def;
 
@@ -263,8 +259,7 @@ public class ItemBundle extends Item {
     }
 
     public static void setColor(ItemStack bundle, EnumDyeColor color) {
-        float[] components = color.getColorComponentValues();
-        setColor(bundle, (int) (components[0] * 255 * components[1] * 255 * components[2] * 255));
+        setColor(bundle, -color.getDyeDamage());
     }
 
     private static void setAmount(ItemStack bundle, int amount) {
@@ -280,7 +275,7 @@ public class ItemBundle extends Item {
 
     private static int getItemstackAmount(ItemStack stack) {
         int size = 1;
-        if (ModConfig.respectStackSize && stack.getMaxStackSize() < 64) size = 64 / stack.getMaxStackSize();
+        if (ConfigHandler.respectStackSize && stack.getMaxStackSize() < 64) size = 64 / stack.getMaxStackSize();
         return size;
     }
 

@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import surreal.bundles.Bundles;
-import surreal.bundles.ModConfig;
+import surreal.bundles.config.ConfigHandler;
 import surreal.bundles.items.ItemBundle;
 
 import javax.annotation.Nonnull;
@@ -71,7 +71,7 @@ public class TooltipEvent {
                 slot++;
             }
 
-            if (ItemBundle.getItemAmount(stack) < ModConfig.bundleLimit) {
+            if (ItemBundle.getItemAmount(stack) < ConfigHandler.bundleLimit) {
                 int x = event.getX() + 12 + ((slot & 3) * 18);
                 int y = event.getY() + 2 + (slot/4 * 18) + ((4 + event.getLines().size() - 1) * event.getLines().size());
 

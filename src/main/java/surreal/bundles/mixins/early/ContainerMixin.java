@@ -8,9 +8,8 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.*;
-import surreal.bundles.Bundles;
-import surreal.bundles.ModConfig;
 import surreal.bundles.ModSounds;
+import surreal.bundles.config.ConfigHandler;
 import surreal.bundles.items.ItemBundle;
 
 import java.util.List;
@@ -236,11 +235,11 @@ public abstract class ContainerMixin {
                                 }
                             }
                         }
-                        else if (itemstack11.getItem() instanceof ItemBundle && Bundles.canPutItem(itemstack8) && ItemBundle.getItemAmount(itemstack11) < ModConfig.bundleLimit && !itemstack8.isEmpty() && dragType == 1) {
+                        else if (itemstack11.getItem() instanceof ItemBundle && ConfigHandler.canPutItem(itemstack8) && ItemBundle.getItemAmount(itemstack11) < ConfigHandler.bundleLimit && !itemstack8.isEmpty() && dragType == 1) {
                             bundles$insertItem(player, itemstack11, itemstack8);
                         }
-                        else if (itemstack8.getItem() instanceof ItemBundle && Bundles.canPutItem(itemstack11) && ItemBundle.getItemAmount(itemstack8) < ModConfig.bundleLimit && dragType == 1) {
-                            bundles$insertItem(player, itemstack11, itemstack8);
+                        else if (itemstack8.getItem() instanceof ItemBundle && ConfigHandler.canPutItem(itemstack11) && ItemBundle.getItemAmount(itemstack8) < ConfigHandler.bundleLimit && dragType == 1) {
+                            bundles$insertItem(player, itemstack8, itemstack11);
                         }
                         else if (slot6.isItemValid(itemstack11))
                         {
